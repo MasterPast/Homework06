@@ -112,30 +112,33 @@ def normalize(file_name): # Функція транслітерації імен
                 "f", "h", "ts", "ch", "sh", "sch", "", "y", "", "e", "yu", "ya", "je", "i", "ji", "g")
     TRANS = {}
     res = ''
+    temp = ()
     for c, l in zip(CYRILLIC_SYMBOLS, TRANSLATION): # Злиття словників для в ітоговий для транслітерації
         TRANS[ord(c)] = l
         TRANS[ord(c.upper())] = l.upper()   
     print(file_name)
-    file_name = os.path.splitext(file_name)[0]
-    res = os.path.splitext(file_name)[1]
-    print(res)
+    temp = os.path.splitext(file_name)
+    file_name = temp[0]
+    res = temp[1]
     file_name = file_name.translate(TRANS) # Транслітерація
     if file_name.isalnum() == False:  # Перевірка на входження до строки будь-яких елементів окрім цифр та літер, та заміна таких символів на '_'
         for ind in file_name:
             if (ind.isalnum() or ind.isdigit()) == False:
                 file_name = file_name.replace(ind, '_', 1) 
-    print(f'file name>>> {file_name}, res>>> {res}')
-    file_name += res # Повертає розширення в ім'я файлу
+    file_name += res
     res = res[1::]
-    print(f'file name>>>rrrr {file_name}, res>>> {res}')
     return file_name, res
 
 
 def search_res(val_key, list_res):  # Функція формує список проаналізованих розширень для виводу в звіт до конкретної категорії файлів.
+    print(val_key)
+    print(list_res)
     dir_name = re.findall('\/[a-zA-Zа-яА-Я0-9._]+$', val_key)
+    print(f'dir_name>>> {dir_name}')
     dir_name = val_key.replace(dir_name[0],'')
     str_name = re.findall('\/[a-zA-Zа-яА-Я0-9]+$', dir_name)
-    if str_name[0] == '/archives':
+    print(str_name)
+    if str_name[0] == '\\archives':
         str_name = list_res[0]
     elif str_name[0] == '/audio':
         str_name = list_res[1]
@@ -152,9 +155,16 @@ def search_res(val_key, list_res):  # Функція формує список �
 
 def sort_arch(cur_path, file_obj, sort_path, filen, dic_arch):  # Функція копіює та розпаковує архів в теку з ім'ям файлу в нове місце розташування.
     print(f'Знайдено новий файл {filen}. Копіюємо...')
-    shutil.copy2(cur_path + '/' + file_obj, sort_path + '/archives/' + filen)
-    new_path = unpack_arch(filen, sort_path + '/archives/')
-    dic_arch.update([(cur_path + '/' + file_obj, new_path)])
+    shutil.copy2(os.path.join(cur_path, file_obj), os.path.join(sort_path, 'archives', filen))
+    new_path = unpack_arch(filen, os.path.join(sort_path, 'archives'))
+    print(new_path)
+    dic_arch.update([(os.path.join(cur_path, file_obj), new_path)])
+
+
+    # print(f'Знайдено новий файл {filen}. Копіюємо...')
+    # shutil.copy2(cur_path + '/' + file_obj, sort_path + '/archives/' + filen)
+    # new_path = unpack_arch(filen, sort_path + '/archives/')
+    # dic_arch.update([(cur_path + '/' + file_obj, new_path)])
 
 
 def sort_aud(cur_path, file_obj, sort_path, filen): # Функція копіює файл в відповідне нове місце розташування.
@@ -196,47 +206,57 @@ def sorting(cur_path, sort_path, list_dic, list_res): # Функція сорт�
         if os.path.isdir(os.path.join(cur_path, file_obj)) == True:          
             sorting(os.path.join(cur_path, file_obj), sort_path, list_dic, list_res)          
         elif os.path.isfile(os.path.join(cur_path, file_obj)) == True:
-            filen, res = normalize('геморроидальная№ шишка4.exe')      #file_obj)
-        print(f'file name>>> {filen}, res>>> {res}')
-        sys.exit()
-        #     if res.lower() == 'zip' or res.lower() == 'gz' or res.lower() == 'targ':
-        #         sort_arch(cur_path, file_obj, sort_path, filen, dic_arch)
-        #         ind = 0
-        #         list_res = format_res(ind, list_res, res)
-        #     elif res.lower() == 'mp3' or res.lower() == 'ogg' or res.lower() == 'wav' or res.lower() == 'amr':
-        #         sort_aud(cur_path, file_obj, sort_path, filen)
-        #         if list_res[1].find(res) == -1:
-        #             list_res[1] = list_res[1] + ' ' + res          
-        #     elif res.lower() == 'doc' or res.lower() == 'docx' or res.lower() == 'txt' or res.lower() == 'pdf' or res.lower() == 'xls'\
-        #                                                                          or res.lower() == 'xlsx' or res.lower() == 'pptx':
-        #         sort_doc(cur_path, file_obj, sort_path, filen)
-        #         if list_res[2].find(res) == -1:
-        #             list_res[2] = list_res[2] + ' ' + res
-        #     elif res.lower() == 'jpeg' or res.lower() == 'png' or res.lower() == 'jpg' or res.lower() == 'svg':
-        #         sort_imag(cur_path, file_obj, sort_path, filen)
-        #         if list_res[3].find(res) == -1:
-        #             list_res[3] = list_res[3] + ' ' + res
-        #     elif res.lower() == 'avi' or res.lower() == 'mp4' or res.lower() == 'mov' or res.lower() == 'mkv':
-        #         sort_vid(cur_path, file_obj, sort_path, filen)
-        #         if list_res[4].find(res) == -1:
-        #             list_res[4] = list_res[4] + ' ' + res
-        #     else:
-        #         sort_oth(cur_path, file_obj, sort_path, filen) 
-        #         if list_res[5].find(res) == -1:
-        #             list_res[5] = list_res[5] + ' ' + res
+            filen, res = normalize(file_obj)
+            if res.lower() == 'zip' or res.lower() == 'gz' or res.lower() == 'targ':
+                sort_arch(cur_path, file_obj, sort_path, filen, dic_arch)
+                ind = 0
+                list_res = format_res(ind, list_res, res)
+            elif res.lower() == 'mp3' or res.lower() == 'ogg' or res.lower() == 'wav' or res.lower() == 'amr':
+                sort_aud(cur_path, file_obj, sort_path, filen)
+                if list_res[1].find(res) == -1:
+                    list_res[1] = list_res[1] + ' ' + res          
+            elif res.lower() == 'doc' or res.lower() == 'docx' or res.lower() == 'txt' or res.lower() == 'pdf' or res.lower() == 'xls'\
+                                                                                 or res.lower() == 'xlsx' or res.lower() == 'pptx':
+                sort_doc(cur_path, file_obj, sort_path, filen)
+                if list_res[2].find(res) == -1:
+                    list_res[2] = list_res[2] + ' ' + res
+            elif res.lower() == 'jpeg' or res.lower() == 'png' or res.lower() == 'jpg' or res.lower() == 'svg':
+                sort_imag(cur_path, file_obj, sort_path, filen)
+                if list_res[3].find(res) == -1:
+                    list_res[3] = list_res[3] + ' ' + res
+            elif res.lower() == 'avi' or res.lower() == 'mp4' or res.lower() == 'mov' or res.lower() == 'mkv':
+                sort_vid(cur_path, file_obj, sort_path, filen)
+                if list_res[4].find(res) == -1:
+                    list_res[4] = list_res[4] + ' ' + res
+            else:
+                sort_oth(cur_path, file_obj, sort_path, filen) 
+                if list_res[5].find(res) == -1:
+                    list_res[5] = list_res[5] + ' ' + res
 
 def unpack_arch(cur_file, cur_path):    # Функція розпаковки архіву, створює теку відповідно імені архиву, після розпаковки до неї, видаляє архів.
                                         # Якщо знаходить вже розпакований архів, видаляє його, та розпаковує наново.
+    tmp = ()
     filen, res = normalize(cur_file)
-    filen = filen.replace('.' + res, '')
-    try:
-        os.mkdir(cur_path + filen)
-    except FileExistsError:
-        shutil.rmtree(cur_path + filen)
-        os.mkdir(cur_path + filen)
-    shutil.unpack_archive(cur_path + cur_file, cur_path + filen)
-    os.remove(cur_path + cur_file)
-    return cur_path + filen
+    tmp = os.path.splitext(filen)
+    # filen = filen.replace('.' + res, '')
+    
+    if os.path.exists(os.path.join(cur_path, tmp[0])) == True:
+        print(12121)
+        print(cur_path)
+        
+        shutil.rmtree(os.path.join(cur_path, tmp[0]))
+        os.mkdir(os.path.join(cur_path, tmp[0]))
+    shutil.unpack_archive(os.path.join(cur_path, cur_file), os.path.join(cur_path, tmp[0]))
+    os.remove(os.path.join(cur_path, cur_file))
+    
+    # try:
+    #     os.mkdir(cur_path + filen)
+    # except FileExistsError:
+    #     shutil.rmtree(cur_path + filen)
+    #     os.mkdir(cur_path + filen)
+    # shutil.unpack_archive(cur_path + cur_file, cur_path + filen)
+    # os.remove(cur_path + cur_file)
+    return os.path.join(cur_path, tmp[0])
 
 
 def write_file(sort_path, list_dic):    # Функція зберігає звіт до файлу SORTED\ZVIT.TXT. В процесі підготовки інформації до зберігання звертається
