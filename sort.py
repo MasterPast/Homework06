@@ -23,7 +23,7 @@ import os
 import shutil
 import datetime
 
-# PATH = 'c:/Pastore/Py/Temp/Мотлох' Строка аргументу, використовувалась при розробці.
+PATH = 'c:\Pastore\Py\Temp\Мотлох' # Строка аргументу, використовувалась при розробці.
 sort_path = ''
 root_path = ''
 dic_arch = {}
@@ -41,10 +41,10 @@ def error_1(path_del): #    Функція помилки 1. Визиваєть�
     ans = ''
     print('Увага! Знайдено існуючи робочі теки програми! При продовжені роботи програми дані будуть перезаписані!')
     ans = input('Продовжувати? (Так/Ні)>>>')
-    if ans.lower() == 'н' or ans.lower() == 'ні' or ans == 'n':
+    if ans.lower() == 'н' or ans.lower() == 'ні' or ans.lower() == 'n':
         print('Завершення роботи програми...')
         sys.exit()
-    elif ans.lower() == 'т' or ans.lower == 'так' or ans == 'y':
+    elif ans.lower() == 'т' or ans.lower == 'так' or ans.lower() == 'y':
         shutil.rmtree(path_del)
     else:
         print('Повторіть ввод, будь ласка...')
@@ -88,28 +88,22 @@ def last_chanse(PATH, root_path): # Функція інформує корист
 
 def make_dirs(PATH): #  Функція створює відповідні теки в теці, розташованій на ступінь вище переданого шляху. 
                      #  При наявності вже створеної будь якої з них, викликає функцію error_1.
-    path_sorted = ''
-    path_sorted = re.findall('\/[a-zA-Zа-яА-Я0-9]+$', PATH)
-    path_sorted = PATH.replace(path_sorted[0],"")
+    path_sorted = PATH
+    os.chdir(path_sorted)
+    os.chdir('..')
+    path_sorted = os.getcwd()
     root_path = path_sorted
-    try:
-        os.mkdir(path_sorted + '/sorted')
-        os.mkdir(path_sorted + '/sorted/archives')
-        os.mkdir(path_sorted + '/sorted/audio')
-        os.mkdir(path_sorted + '/sorted/documents')
-        os.mkdir(path_sorted + '/sorted/images')
-        os.mkdir(path_sorted + '/sorted/others')
-        os.mkdir(path_sorted + '/sorted/video')
-    except FileExistsError:
-        error_1(path_sorted + '/sorted')
-        os.mkdir(path_sorted + '/sorted')
-        os.mkdir(path_sorted + '/sorted/archives')
-        os.mkdir(path_sorted + '/sorted/audio')
-        os.mkdir(path_sorted + '/sorted/documents')
-        os.mkdir(path_sorted + '/sorted/images')
-        os.mkdir(path_sorted + '/sorted/others')
-        os.mkdir(path_sorted + '/sorted/video')
-    return path_sorted + '/sorted', root_path
+    if os.path.exists(os.path.join(path_sorted, 'sorted')) == True:
+        error_1(os.path.join(path_sorted, 'sorted'))
+    path_sorted = os.path.join(path_sorted, 'sorted')
+    os.mkdir(path_sorted)
+    os.mkdir(os.path.join(path_sorted, 'archives'))
+    os.mkdir(os.path.join(path_sorted, 'audio'))
+    os.mkdir(os.path.join(path_sorted, 'documents'))
+    os.mkdir(os.path.join(path_sorted, 'images'))
+    os.mkdir(os.path.join(path_sorted, 'others'))
+    os.mkdir(os.path.join(path_sorted, 'video'))
+    return path_sorted, root_path
 
 
 def normalize(file_name): # Функція транслітерації імені файлу із заміною всіх спецзнаків та пробілів на "_". Розширення не змінюється.
@@ -198,36 +192,38 @@ def sorting(cur_path, sort_path, list_dic, list_res): # Функція сорт�
                                                       # що відповідає типу розширення.
     new_path = ''
     ind = 0
+    sys.exit()
     for file_obj in os.listdir(cur_path):
-        if os.path.isdir(cur_path + '/' + file_obj) == True:          
-            sorting(cur_path + '/' + file_obj, sort_path, list_dic, list_res)          
-        elif os.path.isfile(cur_path + '/' + file_obj) == True:
+        if os.path.isdir(os.path.join(cur_path, file_obj)) == True:          
+            sorting(os.path.join(cur_path, file_obj), sort_path, list_dic, list_res)          
+        elif os.path.isfile(os.path.join(cur_path, file_obj)) == True:
             filen, res = normalize(file_obj)
-            if res.lower() == 'zip' or res.lower() == 'gz' or res.lower() == 'targ':
-                sort_arch(cur_path, file_obj, sort_path, filen, dic_arch)
-                ind = 0
-                list_res = format_res(ind, list_res, res)
-            elif res.lower() == 'mp3' or res.lower() == 'ogg' or res.lower() == 'wav' or res.lower() == 'amr':
-                sort_aud(cur_path, file_obj, sort_path, filen)
-                if list_res[1].find(res) == -1:
-                    list_res[1] = list_res[1] + ' ' + res          
-            elif res.lower() == 'doc' or res.lower() == 'docx' or res.lower() == 'txt' or res.lower() == 'pdf' or res.lower() == 'xls'\
-                                                                                 or res.lower() == 'xlsx' or res.lower() == 'pptx':
-                sort_doc(cur_path, file_obj, sort_path, filen)
-                if list_res[2].find(res) == -1:
-                    list_res[2] = list_res[2] + ' ' + res
-            elif res.lower() == 'jpeg' or res.lower() == 'png' or res.lower() == 'jpg' or res.lower() == 'svg':
-                sort_imag(cur_path, file_obj, sort_path, filen)
-                if list_res[3].find(res) == -1:
-                    list_res[3] = list_res[3] + ' ' + res
-            elif res.lower() == 'avi' or res.lower() == 'mp4' or res.lower() == 'mov' or res.lower() == 'mkv':
-                sort_vid(cur_path, file_obj, sort_path, filen)
-                if list_res[4].find(res) == -1:
-                    list_res[4] = list_res[4] + ' ' + res
-            else:
-                sort_oth(cur_path, file_obj, sort_path, filen) 
-                if list_res[5].find(res) == -1:
-                    list_res[5] = list_res[5] + ' ' + res
+        sys.exit()
+        #     if res.lower() == 'zip' or res.lower() == 'gz' or res.lower() == 'targ':
+        #         sort_arch(cur_path, file_obj, sort_path, filen, dic_arch)
+        #         ind = 0
+        #         list_res = format_res(ind, list_res, res)
+        #     elif res.lower() == 'mp3' or res.lower() == 'ogg' or res.lower() == 'wav' or res.lower() == 'amr':
+        #         sort_aud(cur_path, file_obj, sort_path, filen)
+        #         if list_res[1].find(res) == -1:
+        #             list_res[1] = list_res[1] + ' ' + res          
+        #     elif res.lower() == 'doc' or res.lower() == 'docx' or res.lower() == 'txt' or res.lower() == 'pdf' or res.lower() == 'xls'\
+        #                                                                          or res.lower() == 'xlsx' or res.lower() == 'pptx':
+        #         sort_doc(cur_path, file_obj, sort_path, filen)
+        #         if list_res[2].find(res) == -1:
+        #             list_res[2] = list_res[2] + ' ' + res
+        #     elif res.lower() == 'jpeg' or res.lower() == 'png' or res.lower() == 'jpg' or res.lower() == 'svg':
+        #         sort_imag(cur_path, file_obj, sort_path, filen)
+        #         if list_res[3].find(res) == -1:
+        #             list_res[3] = list_res[3] + ' ' + res
+        #     elif res.lower() == 'avi' or res.lower() == 'mp4' or res.lower() == 'mov' or res.lower() == 'mkv':
+        #         sort_vid(cur_path, file_obj, sort_path, filen)
+        #         if list_res[4].find(res) == -1:
+        #             list_res[4] = list_res[4] + ' ' + res
+        #     else:
+        #         sort_oth(cur_path, file_obj, sort_path, filen) 
+        #         if list_res[5].find(res) == -1:
+        #             list_res[5] = list_res[5] + ' ' + res
 
 def unpack_arch(cur_file, cur_path):    # Функція розпаковки архіву, створює теку відповідно імені архиву, після розпаковки до неї, видаляє архів.
                                         # Якщо знаходить вже розпакований архів, видаляє його, та розпаковує наново.
@@ -264,7 +260,7 @@ def write_file(sort_path, list_dic):    # Функція зберігає зві
         fa.write('|Загалом відсортовано {} файл(а/ів)\n'.format(str(all_num)))
         fa.write(('-' * 187) + '\n')
 
-PATH = sys.argv[1]  # Считування місцезнаходження папки з командної строки. Прописано вище в константах.
+# PATH = sys.argv[1]  # Считування місцезнаходження папки з командної строки. Прописано вище в константах.
 sort_path, root_path = make_dirs(PATH)
 sorting(PATH, sort_path, list_dic, list_res)
 write_file(sort_path + '/ZVIT.TXT', list_dic)
