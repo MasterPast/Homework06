@@ -114,20 +114,20 @@ def normalize(file_name): # Функція транслітерації імен
     res = ''
     for c, l in zip(CYRILLIC_SYMBOLS, TRANSLATION): # Злиття словників для в ітоговий для транслітерації
         TRANS[ord(c)] = l
-        TRANS[ord(c.upper())] = l.upper()    
-    res = re.findall('.[a-zA-Z0-9]+$', file_name) # Шукає розширення, якщо його немає, передбачає відсутність помилки
-    if res == []:
-        res = ''
-    else:
-        res = res[0]    
-    file_name = file_name.replace(res, '') # Від'єднує розширення
+        TRANS[ord(c.upper())] = l.upper()   
+    print(file_name)
+    file_name = os.path.splitext(file_name)[0]
+    res = os.path.splitext(file_name)[1]
+    print(res)
     file_name = file_name.translate(TRANS) # Транслітерація
     if file_name.isalnum() == False:  # Перевірка на входження до строки будь-яких елементів окрім цифр та літер, та заміна таких символів на '_'
         for ind in file_name:
             if (ind.isalnum() or ind.isdigit()) == False:
                 file_name = file_name.replace(ind, '_', 1) 
+    print(f'file name>>> {file_name}, res>>> {res}')
     file_name += res # Повертає розширення в ім'я файлу
     res = res[1::]
+    print(f'file name>>>rrrr {file_name}, res>>> {res}')
     return file_name, res
 
 
@@ -192,12 +192,12 @@ def sorting(cur_path, sort_path, list_dic, list_res): # Функція сорт�
                                                       # що відповідає типу розширення.
     new_path = ''
     ind = 0
-    sys.exit()
     for file_obj in os.listdir(cur_path):
         if os.path.isdir(os.path.join(cur_path, file_obj)) == True:          
             sorting(os.path.join(cur_path, file_obj), sort_path, list_dic, list_res)          
         elif os.path.isfile(os.path.join(cur_path, file_obj)) == True:
-            filen, res = normalize(file_obj)
+            filen, res = normalize('геморроидальная№ шишка4.exe')      #file_obj)
+        print(f'file name>>> {filen}, res>>> {res}')
         sys.exit()
         #     if res.lower() == 'zip' or res.lower() == 'gz' or res.lower() == 'targ':
         #         sort_arch(cur_path, file_obj, sort_path, filen, dic_arch)
