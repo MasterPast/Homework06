@@ -18,12 +18,11 @@
 #   можна сміливо видаляти теку.  
 
 import sys      
-import re
 import os
 import shutil
 import datetime
 
-PATH = 'c:\Pastore\Py\Temp\Мотлох' # Строка аргументу, використовувалась при розробці.
+# PATH = 'c:\Pastore\Py\Temp\Мотлох' # Строка аргументу, використовувалась при розробці.
 sort_path = ''
 root_path = ''
 dic_arch = {}
@@ -51,19 +50,7 @@ def error_1(path_del): #    Функція помилки 1. Визиваєть�
         error_1()
 
 
-def format_res(ind, list_res, res): #   Функція перевіряє чи це є нове розширення файлу, якщо так, додає його до списку опрацьованих розширень.
-    sovp = False
-    res = ' ' + res
-    for q in re.findall(' [a-zA-Z0-9]+', list_res[ind]):
-        if res == q:
-            sovp = True
-            break
-    if sovp == False:
-        list_res[ind] += ' ' + res  
-    return list_res
-
-
-def last_chanse(PATH, root_path): # Функція інформує користувача про закінчення роботи програми, та пропонує вибір подальших дій.
+def last_chanсe(PATH, root_path): # Функція інформує користувача про закінчення роботи програми, та пропонує вибір подальших дій.
     ans = ''
     date = datetime.datetime.now()
     res = date + datetime.timedelta(days=14)
@@ -77,8 +64,9 @@ def last_chanse(PATH, root_path): # Функція інформує корист
             shutil.rmtree(PATH)
             print(f'Видалення теки {PATH} успішно завершено.')
         elif ans == '2':
-            shutil.move(PATH, root_path + '/ВИДАЛИТИ-ПІСЛЯ-' + str(res.date()))
-            print(f'Стара тека успішно перейменовано в {root_path + "/ВИДАЛИТИ-ПІСЛЯ-" + str(res.date())}.')
+            root_path = os.path.join(root_path, 'ВИДАЛИТИ-ПІСЛЯ-' + str(res.date()))
+            shutil.move(PATH, root_path)
+            print(f'Стара тека успішно перейменовано в {root_path}.')
             print('Не забудьте видалити теку після указаного сроку!')
             print('Завершення роботи програми.')
             sys.exit()
@@ -116,7 +104,6 @@ def normalize(file_name): # Функція транслітерації імен
     for c, l in zip(CYRILLIC_SYMBOLS, TRANSLATION): # Злиття словників для в ітоговий для транслітерації
         TRANS[ord(c)] = l
         TRANS[ord(c.upper())] = l.upper()   
-    print(file_name)
     temp = os.path.splitext(file_name)
     file_name = temp[0]
     res = temp[1]
@@ -132,20 +119,8 @@ def normalize(file_name): # Функція транслітерації імен
 
 def search_res(val_key, list_res):  # Функція формує список проаналізованих розширень для виводу в звіт до конкретної категорії файлів.
     str_name = os.path.split(val_key)
+    dir_name = str_name[0]
     str_name = os.path.split(str_name[0])
-    # print(val_key)
-    # print(list_res)
-    # print(os.getcwd())
-    # print(pat1)
-    
-    
-    
-    # print(pat2)
-    # dir_name = re.findall('\[a-zA-Zа-яА-Я0-9._]+$', val_key)
-    # print(f'dir_name>>> {dir_name}')
-    # dir_name = val_key.replace(dir_name[0],'')
-    # str_name = re.findall('\[a-zA-Zа-яА-Я0-9]+$', dir_name)
-    print(str_name[1])
     if str_name[1] == 'archives':
         str_name = list_res[0]
     elif str_name[1] == 'audio':
@@ -162,48 +137,41 @@ def search_res(val_key, list_res):  # Функція формує список �
 
 
 def sort_arch(cur_path, file_obj, sort_path, filen, dic_arch):  # Функція копіює та розпаковує архів в теку з ім'ям файлу в нове місце розташування.
-    print(f'Знайдено новий файл {filen}. Копіюємо...')
+    print(f'Знайдено новий файл: {file_obj}. Транслітеруємо в: {filen}. Копіюємо...')    
     shutil.copy2(os.path.join(cur_path, file_obj), os.path.join(sort_path, 'archives', filen))
     new_path = unpack_arch(filen, os.path.join(sort_path, 'archives'))
-    print(new_path)
     dic_arch.update([(os.path.join(cur_path, file_obj), new_path)])
 
 
-    # print(f'Знайдено новий файл {filen}. Копіюємо...')
-    # shutil.copy2(cur_path + '/' + file_obj, sort_path + '/archives/' + filen)
-    # new_path = unpack_arch(filen, sort_path + '/archives/')
-    # dic_arch.update([(cur_path + '/' + file_obj, new_path)])
-
-
 def sort_aud(cur_path, file_obj, sort_path, filen): # Функція копіює файл в відповідне нове місце розташування.
-    print(f'Знайдено новий файл {filen}. Копіюємо...')
-    shutil.copy2(cur_path + '/' + file_obj, sort_path + '/audio/' + filen)
-    dic_aud.update([(cur_path + '/' + file_obj, sort_path + '/audio/' + filen)])
+    print(f'Знайдено новий файл: {file_obj}. Транслітеруємо в: {filen}. Копіюємо...')    
+    shutil.copy2(os.path.join(cur_path, file_obj), os.path.join(sort_path, 'audio', filen))
+    dic_aud.update([(os.path.join(cur_path, file_obj), os.path.join(sort_path, 'audio', filen))])
     
 
 def sort_doc(cur_path, file_obj, sort_path, filen):  # Функція копіює файл в відповідне нове місце розташування.
-    print(f'Знайдено новий файл {filen}. Копіюємо...')
-    shutil.copy2(cur_path + '/' + file_obj, sort_path + '/documents/' + filen)
-    dic_doc.update([(cur_path + '/' + file_obj, sort_path + '/documents/' + filen)])
-
+    print(f'Знайдено новий файл: {file_obj}. Транслітеруємо в: {filen}. Копіюємо...')    
+    shutil.copy2(os.path.join(cur_path, file_obj), os.path.join(sort_path, 'documents', filen))
+    dic_doc.update([(os.path.join(cur_path, file_obj), os.path.join(sort_path, 'documents', filen))])
+    
 
 def sort_imag(cur_path, file_obj, sort_path, filen): # Функція копіює файл в відповідне нове місце розташування.
-    print(f'Знайдено новий файл {filen}. Копіюємо...')
-    shutil.copy2(cur_path + '/' + file_obj, sort_path + '/images/' + filen)
-    dic_imag.update([(cur_path + '/' + file_obj, sort_path + '/images/' + filen)])
+    print(f'Знайдено новий файл: {file_obj}. Транслітеруємо в: {filen}. Копіюємо...')    
+    shutil.copy2(os.path.join(cur_path, file_obj), os.path.join(sort_path, 'images', filen))
+    dic_imag.update([(os.path.join(cur_path, file_obj), os.path.join(sort_path, 'images', filen))])
 
 
 def sort_vid(cur_path, file_obj, sort_path, filen): # Функція копіює файл в відповідне нове місце розташування.
-    print(f'Знайдено новий файл {filen}. Копіюємо...')
-    shutil.copy2(cur_path + '/' + file_obj, sort_path + '/video/' + filen)
-    dic_vid.update([(cur_path + '/' + file_obj, sort_path + '/video/' + filen)])
-
+    print(f'Знайдено новий файл: {file_obj}. Транслітеруємо в: {filen}. Копіюємо...')    
+    shutil.copy2(os.path.join(cur_path, file_obj), os.path.join(sort_path, 'video', filen))
+    dic_vid.update([(os.path.join(cur_path, file_obj), os.path.join(sort_path, 'video', filen))])
+    
 
 def sort_oth(cur_path, file_obj, sort_path, filen): # Функція копіює файл в відповідне нове місце розташування.
-    print(f'Знайдено новий файл {filen}. Копіюємо...')
-    shutil.copy2(cur_path + '/' + file_obj, sort_path + '/others/' + filen)
-    dic_oth.update([(cur_path + '/' + file_obj, sort_path + '/others/' + filen)])
-
+    print(f'Знайдено новий файл: {file_obj}. Транслітеруємо в: {filen}. Копіюємо...')    
+    shutil.copy2(os.path.join(cur_path, file_obj), os.path.join(sort_path, 'others', filen))
+    dic_oth.update([(os.path.join(cur_path, file_obj), os.path.join(sort_path, 'others', filen))])
+    
 
 def sorting(cur_path, sort_path, list_dic, list_res): # Функція сортування файлів за розширенням. Перебирає об'єкти в поточній теці, якщо об'єкт 
                                                       # є текою, - входить до рекурсивної перевірки. якщо об'єкт є файлом, копіює його у теку,
@@ -217,59 +185,54 @@ def sorting(cur_path, sort_path, list_dic, list_res): # Функція сорт�
             filen, res = normalize(file_obj)
             if res.lower() == 'zip' or res.lower() == 'gz' or res.lower() == 'targ':
                 sort_arch(cur_path, file_obj, sort_path, filen, dic_arch)
-                ind = 0
-                list_res = format_res(ind, list_res, res)
+                res = ' ' + res + ' '
+                if list_res[0].find(res) == -1:
+                    list_res[0] += res
             elif res.lower() == 'mp3' or res.lower() == 'ogg' or res.lower() == 'wav' or res.lower() == 'amr':
                 sort_aud(cur_path, file_obj, sort_path, filen)
+                res = ' ' + res + ' '
                 if list_res[1].find(res) == -1:
-                    list_res[1] = list_res[1] + ' ' + res          
+                    list_res[1] += res          
             elif res.lower() == 'doc' or res.lower() == 'docx' or res.lower() == 'txt' or res.lower() == 'pdf' or res.lower() == 'xls'\
                                                                                  or res.lower() == 'xlsx' or res.lower() == 'pptx':
                 sort_doc(cur_path, file_obj, sort_path, filen)
+                res = ' ' + res + ' '
                 if list_res[2].find(res) == -1:
-                    list_res[2] = list_res[2] + ' ' + res
+                    list_res[2] += res
             elif res.lower() == 'jpeg' or res.lower() == 'png' or res.lower() == 'jpg' or res.lower() == 'svg':
                 sort_imag(cur_path, file_obj, sort_path, filen)
+                res = ' ' + res + ' '
                 if list_res[3].find(res) == -1:
-                    list_res[3] = list_res[3] + ' ' + res
+                    list_res[3] += res
             elif res.lower() == 'avi' or res.lower() == 'mp4' or res.lower() == 'mov' or res.lower() == 'mkv':
                 sort_vid(cur_path, file_obj, sort_path, filen)
+                res = ' ' + res + ' '
                 if list_res[4].find(res) == -1:
-                    list_res[4] = list_res[4] + ' ' + res
+                    list_res[4] += res 
             else:
                 sort_oth(cur_path, file_obj, sort_path, filen) 
+                res = ' ' + res + ' '
                 if list_res[5].find(res) == -1:
-                    list_res[5] = list_res[5] + ' ' + res
+                    list_res[5] += res 
 
 def unpack_arch(cur_file, cur_path):    # Функція розпаковки архіву, створює теку відповідно імені архиву, після розпаковки до неї, видаляє архів.
                                         # Якщо знаходить вже розпакований архів, видаляє його, та розпаковує наново.
     tmp = ()
     filen, res = normalize(cur_file)
     tmp = os.path.splitext(filen)
-    # filen = filen.replace('.' + res, '')
-    
     if os.path.exists(os.path.join(cur_path, tmp[0])) == True:
-        print(12121)
-        print(cur_path)
-        
         shutil.rmtree(os.path.join(cur_path, tmp[0]))
         os.mkdir(os.path.join(cur_path, tmp[0]))
     shutil.unpack_archive(os.path.join(cur_path, cur_file), os.path.join(cur_path, tmp[0]))
     os.remove(os.path.join(cur_path, cur_file))
-    
-    # try:
-    #     os.mkdir(cur_path + filen)
-    # except FileExistsError:
-    #     shutil.rmtree(cur_path + filen)
-    #     os.mkdir(cur_path + filen)
-    # shutil.unpack_archive(cur_path + cur_file, cur_path + filen)
-    # os.remove(cur_path + cur_file)
     return os.path.join(cur_path, tmp[0])
 
 
 def write_file(sort_path, list_dic):    # Функція зберігає звіт до файлу SORTED\ZVIT.TXT. В процесі підготовки інформації до зберігання звертається
                                         # до функції search_res(), яка виконує пошук різманітних розширень опрацьованих програмою.
     print_str = ''
+    wroot1 = ''
+    wroot2 = ''
     all_num = 0
     with open(sort_path, 'w') as fa:
         for dicts in list_dic:
@@ -283,13 +246,19 @@ def write_file(sort_path, list_dic):    # Функція зберігає зві
             fa.write(('-' * 187) + '\n')
             if num != 0:
                 str_name, dir_name = search_res(val_key, list_res)
-                fa.write('|Загалом ідентифіковано {} файл(а/ів) в теці {}. Знайдено файли з наступними розширеннями: {}\n'.format(str(num), dir_name, str_name))
+                wroot1 = f'| Загалом ідентифіковано {num} файл(а/ів) в теці {dir_name}. Знайдено файли з наступними розширеннями: {str_name}'
+                fa.write('{:{fill}{align}{width}}'.format(wroot1, fill = ' ', align = '<', width = 186) + '|\n')
+                # fa.write('| Загалом ідентифіковано {} файл(а/ів) в теці {}. Знайдено файли з наступними розширеннями: {}\n'.format(str(num), dir_name, str_name))
         fa.write(('-' * 187) + '\n')
-        fa.write('|Загалом відсортовано {} файл(а/ів)\n'.format(str(all_num)))
+        wroot2 = f'| Загалом відсортовано {all_num} файл(а/ів)'
+        fa.write('{:{fill}{align}{width}}'.format(wroot2, fill = ' ', align = '<', width = 186) + '|\n')
+        fa.write(('-' * 187) + '\n')
+        wroot2 = f'| Дата формування звіту: {datetime.datetime.now().date()}' 
+        fa.write('{:{fill}{align}{width}}'.format(wroot2, fill = ' ', align = '<', width = 186) + '|\n')
         fa.write(('-' * 187) + '\n')
 
-# PATH = sys.argv[1]  # Считування місцезнаходження папки з командної строки. Прописано вище в константах.
+PATH = sys.argv[1]  # Считування місцезнаходження папки з командної строки. Прописано вище в константах.
 sort_path, root_path = make_dirs(PATH)
 sorting(PATH, sort_path, list_dic, list_res)
 write_file(sort_path + '/ZVIT.TXT', list_dic)
-last_chanse(PATH, root_path)
+last_chanсe(PATH, root_path)
