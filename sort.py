@@ -131,24 +131,32 @@ def normalize(file_name): # Функція транслітерації імен
 
 
 def search_res(val_key, list_res):  # Функція формує список проаналізованих розширень для виводу в звіт до конкретної категорії файлів.
-    print(val_key)
-    print(list_res)
-    dir_name = re.findall('\/[a-zA-Zа-яА-Я0-9._]+$', val_key)
-    print(f'dir_name>>> {dir_name}')
-    dir_name = val_key.replace(dir_name[0],'')
-    str_name = re.findall('\/[a-zA-Zа-яА-Я0-9]+$', dir_name)
-    print(str_name)
-    if str_name[0] == '\\archives':
+    str_name = os.path.split(val_key)
+    str_name = os.path.split(str_name[0])
+    # print(val_key)
+    # print(list_res)
+    # print(os.getcwd())
+    # print(pat1)
+    
+    
+    
+    # print(pat2)
+    # dir_name = re.findall('\[a-zA-Zа-яА-Я0-9._]+$', val_key)
+    # print(f'dir_name>>> {dir_name}')
+    # dir_name = val_key.replace(dir_name[0],'')
+    # str_name = re.findall('\[a-zA-Zа-яА-Я0-9]+$', dir_name)
+    print(str_name[1])
+    if str_name[1] == 'archives':
         str_name = list_res[0]
-    elif str_name[0] == '/audio':
+    elif str_name[1] == 'audio':
         str_name = list_res[1]
-    elif str_name[0] == '/documents':
+    elif str_name[1] == 'documents':
         str_name = list_res[2]
-    elif str_name[0] == '/images':
+    elif str_name[1] == 'images':
         str_name = list_res[3]
-    elif str_name[0] == '/video':
+    elif str_name[1] == 'video':
         str_name = list_res[4]
-    elif str_name[0] == '/others':
+    elif str_name[1] == 'others':
         str_name = list_res[5]
     return str_name, dir_name
 
